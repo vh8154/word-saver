@@ -1,6 +1,0 @@
-# dune init proj word-saver
-# OCAMLPARAM: unset
-# Shared cache: enabled-except-user-rules
-# Shared cache location: /Users/vivianha/.cache/dune/db
-# Workspace root: /Users/vivianha/3110/word-saver/word-saver
-# Auto-detected concurrency: 12
