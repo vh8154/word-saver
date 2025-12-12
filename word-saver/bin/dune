@@ -1,0 +1,4 @@
+(executable
+ (public_name word-saver)
+ (name main)
+ (libraries word_saver))

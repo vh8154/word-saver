@@ -1,0 +1,2 @@
+(library
+ (name word_saver))
