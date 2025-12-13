@@ -2,11 +2,11 @@
  (name core)
  (modules Model Db Json_util)
  (wrapped false)
- (libraries yojson))
+ (libraries yojson unix))
 
 (executable
  (name main)
  (public_name word_saver)
  (modules Main Ui)
- (libraries core yojson))
+ (libraries core yojson unix))
 
