@@ -23,6 +23,11 @@ let add_word word meaning tags db =
   in
   StringMap.add word entry db
 
+(* removes a word from the database
+   if the word does not exist, the database is unchanged *)
+let delete_word word db =
+  StringMap.remove word db
+
 let min3 a b c =
   min a (min b c)
 
