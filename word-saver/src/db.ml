@@ -13,6 +13,10 @@ let today () =
     (tm.tm_mon + 1)
     tm.tm_mday
 
+(* initialize randomness *)
+let () = Random.self_init ()
+
+(* add a word, with the meaning, tags and date added information *)
 let add_word word meaning tags db =
   let entry =
     {
@@ -27,6 +31,23 @@ let add_word word meaning tags db =
    if the word does not exist, the database is unchanged *)
 let delete_word word db =
   StringMap.remove word db
+
+(* helper functions for review mode *)
+(* shuffle word entries *)
+let shuffle lst =
+  let arr = Array.of_list lst in
+  for i = Array.length arr - 1 downto 1 do
+    let j = Random.int (i + 1) in
+    let tmp = arr.(i) in
+    arr.(i) <- arr.(j);
+    arr.(j) <- tmp
+  done;
+  Array.to_list arr
+
+(* random selection of word entries*)
+let select_random n db =
+  let entries = StringMap.bindings db in
+  shuffle entries |> List.take n
 
 let min3 a b c =
   min a (min b c)
@@ -91,11 +112,22 @@ let search query db =
       else
         search_fuzzy query db
 
+(* return all database entries with the given tag*)
 let filter_by_tag tag db =
   StringMap.bindings db
   |> List.filter (fun (_, e) -> List.exists ((=) tag) e.tags)
 
+(* Return a sorted list of all unique tags in the database *)
+let all_tags db =
+  StringMap.bindings db
+  |> List.map (fun (_, e) -> e.tags)
+  |> List.concat
+  |> List.sort_uniq String.compare
+
+(* returns all entries in alphabetical order *)
 let list_alphabetical db = StringMap.bindings db
+
+(* returns all entries sorted by date added (earliest to latest) *)
 let list_by_date db =
   List.sort (fun (_, a) (_, b) -> compare a.date_added b.date_added)
     (StringMap.bindings db)

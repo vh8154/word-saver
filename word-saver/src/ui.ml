@@ -11,8 +11,25 @@ let print_entry (word,e) =
   Printf.printf "\nWord: %s\nMeaning: %s\nTags: %s\nDate: %s\n"
     word e.meaning (String.concat ", " e.tags) e.date_added
 
+(* helper functions for review mode *)
+(* -------------------------------- *)
+let wait () =
+  ignore (read_line ())
 
-(* helper functions for cacheing recent searches*)
+let review words =
+  List.iter (fun (w, e) ->
+    Printf.printf "\nWord: %s\n" w;
+    print_endline "(press Enter to see meaning)";
+    wait ();
+    Printf.printf "Meaning: %s\nTags: %s\n"
+      e.meaning
+      (String.concat ", " e.tags);
+    print_endline "------------------";
+    wait ()
+  ) words
+
+(* helper functions for cacheing recent searches *)
+(* --------------------------------------------- *)
 let max_cache_size = 5
 
 let cache_lookup query cache =
@@ -28,7 +45,8 @@ let cache_add query results cache =
   else
     cache
 
-(* search query history helper*)
+(* search query history helper *)
+(* --------------------------- *)
 let print_recent_searches cache =
   if cache <> [] then (
     print_endline "\nRecent searches:";
@@ -47,7 +65,8 @@ let rec loop filename db cache =
   print_endline "4. Filter by tag";
   print_endline "5. List alphabetical";
   print_endline "6. List by date";
-  print_endline "7. Save & Exit";
+  print_endline "7. Review mode";
+  print_endline "8. Save & Exit";
   print_string "> ";
   match read_line () with
   | "1" ->
@@ -81,17 +100,44 @@ let rec loop filename db cache =
 
     let cache = cache_add q results cache in
     loop filename db cache
-  | "4" ->
-    let t = prompt "Tag: " in
-    Db.filter_by_tag t db |> List.iter print_entry;
-    loop filename db cache
+| "4" ->
+    let tags = Db.all_tags db in
+    if tags = [] then (
+      print_endline "No tags available.";
+      loop filename db cache
+    ) else (
+      print_endline "\nAvailable tags:";
+      List.iter (fun t -> Printf.printf "- %s\n" t) tags;
+      let t = prompt "Tag: " in
+      Db.filter_by_tag t db |> List.iter print_entry;
+      loop filename db cache
+    )
   | "5" ->
     Db.list_alphabetical db |> List.iter print_entry;
     loop filename db cache
   | "6" ->
     Db.list_by_date db |> List.iter print_entry;
     loop filename db cache
-  | "7" -> 
+  | "7" ->
+    let n =
+      prompt "How many words to review? "
+      |> int_of_string_opt
+    in
+    (match n with
+     | None ->
+         print_endline "Please enter a valid number.";
+         loop filename db cache
+     | Some n ->
+         let total = List.length (Db.list_alphabetical db) in
+         if n <= 0 || n > total then (
+           Printf.printf "Please choose between 1 and %d.\n" total;
+           loop filename db cache
+         ) else (
+           let words = Db.select_random n db in
+           review words;
+           loop filename db cache
+         ))
+  | "8" -> 
     save_db filename db; 
     print_endline "Saved... exiting!"
   | _ -> print_endline "Invalid option"; loop filename db cache
