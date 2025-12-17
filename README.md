@@ -6,7 +6,7 @@ The goal is to help learners track words efficiently.
 
 # How To Run
 1. Clone the repository
-2. ``` cd word-saver```
+2. ``` cd word-saver ```
 2. ``` dune build ```
 3. ``` dune exec word_saver ```
 
